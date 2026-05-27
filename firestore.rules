@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && 
+             request.auth.token.email == 'kumarsujit24@gmail.com' &&
+             request.auth.token.email_verified == true;
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidSystemConfig(data) {
+      return data.pixazoApiKey is string && data.pixazoApiKey.size() <= 256 &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy == request.auth.uid &&
+             data.keys().hasAll(['pixazoApiKey', 'updatedAt', 'updatedBy']) &&
+             data.keys().size() == 3;
+    }
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 256 &&
+             data.createdAt is string && // Simplified format check
+             data.keys().hasAll(['uid', 'email']) &&
+             data.keys().size() <= 15; // Room for optional fields
+    }
+
+    function isValidPost(data) {
+      return data.userId == request.auth.uid &&
+             data.platform is string && data.platform.size() <= 32 &&
+             data.content is string && data.content.size() <= 10000 &&
+             data.status in ['scheduled', 'approved', 'published', 'failed'] &&
+             data.keys().hasAll(['userId', 'platform', 'content', 'status', 'scheduledAt']) &&
+             data.keys().size() <= 20;
+    }
+
+    // --- Match Blocks ---
+
+    match /users/{userId} {
+      allow list: if isSuperAdmin();
+      allow get: if isSuperAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                    incoming().createdAt is timestamp;
+      allow update: if isSignedIn() && request.auth.uid == userId && 
+                    incoming().diff(existing()).affectedKeys().hasOnly([
+                      'brandGuidelines', 'brandLogoDark', 'brandLogoLight',
+                      'brandWebsite', 'imageStyle', 'platformConnections', 
+                      'showCelebrations', 'celebrationFilter', 'geminiApiKeys',
+                      'sharedUsageCount', 'pixazoApiKey'
+                    ]);
+    }
+
+    match /shared_api_keys/{keyId} {
+      allow list, get: if isSignedIn();
+      allow create, update: if isSignedIn() && incoming().ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+    }
+
+    match /system_config/{configId} {
+      allow get: if isSignedIn();
+      allow list: if isSuperAdmin();
+      allow create: if isSuperAdmin() && isValidSystemConfig(incoming());
+      allow update: if isSuperAdmin() && isValidSystemConfig(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['pixazoApiKey', 'updatedAt', 'updatedBy']);
+      allow delete: if false;
+    }
+
+    match /posts/{postId} {
+      allow list: if isSuperAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow get: if isSuperAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      
+      allow create: if isSignedIn() && isValidId(postId) && isValidPost(incoming()) &&
+                    incoming().createdAt is timestamp;
+                    
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && 
+                    isValidPost(incoming()) &&
+                    incoming().userId == existing().userId &&
+                    (
+                      // Action: Approval
+                      (incoming().status == 'approved' && incoming().diff(existing()).affectedKeys().hasOnly(['status'])) ||
+                      // Action: Edit
+                      (incoming().diff(existing()).affectedKeys().hasOnly(['content', 'hashtags', 'scheduledAt', 'idea', 'imageData', 'imageStyle', 'imageType'])) ||
+                      // Action: System Notification
+                      (incoming().diff(existing()).affectedKeys().hasOnly(['notified']))
+                    );
+                    
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid && 
+                    existing().status != 'published'; // Prevent deleting public track record
+    }
+  }
+}

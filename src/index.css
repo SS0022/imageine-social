@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+}
+
+:root {
+  --color-brand: #6366f1;
+}
+
+body {
+  @apply bg-[#fafafa] text-slate-900 font-sans;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-sm;
+}
+
+.btn-primary {
+  @apply bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-indigo-200;
+}
+
+.input-field {
+  @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all;
+}
+
+.custom-calendar .react-calendar {
+  @apply border-none font-sans bg-transparent w-full;
+}
+
+.custom-calendar .react-calendar__navigation {
+  @apply mb-4;
+}
+
+.custom-calendar .react-calendar__navigation button {
+  @apply text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all;
+}
+
+.custom-calendar .react-calendar__month-view__weekdays {
+  @apply text-slate-400 font-bold text-[10px] uppercase tracking-wider mb-2;
+}
+
+.custom-calendar .react-calendar__tile {
+  @apply p-3 text-sm font-medium rounded-xl transition-all relative;
+}
+
+.custom-calendar .react-calendar__tile--now {
+  @apply bg-indigo-50 text-indigo-700;
+}
+
+.custom-calendar .react-calendar__tile--active {
+  @apply !bg-indigo-600 !text-white shadow-lg shadow-indigo-200;
+}
+
+.custom-calendar .react-calendar__tile:hover {
+  @apply bg-slate-100;
+}
+
+.has-post-dot::after {
+  content: '';
+  @apply absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-400 rounded-full;
+}
+
+.react-calendar__tile--active.has-post-dot::after {
+  @apply bg-white;
+}

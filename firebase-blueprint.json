@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User preferences and brand guidelines.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "brandGuidelines": { "type": "string" },
+        "brandLogoDark": { "type": "string" },
+        "brandLogoLight": { "type": "string" },
+        "brandWebsite": { "type": "string" },
+        "imageStyle": { "type": "string" },
+        "platformConnections": { "type": "object" },
+        "showCelebrations": { "type": "boolean" },
+        "celebrationFilter": { "type": "string" },
+        "geminiApiKeys": { "type": "array" },
+        "pixazoApiKey": { "type": "string" },
+        "sharedUsageCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "SharedKey": {
+      "title": "Shared API Key",
+      "description": "An API key marked as shared by a user.",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Post": {
+      "title": "Social Media Post",
+      "description": "A generated or scheduled social media post.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "idea": { "type": "string" },
+        "platform": { "type": "string" },
+        "content": { "type": "string" },
+        "hashtags": { "type": "array" },
+        "status": { "type": "string", "enum": ["scheduled", "approved", "published", "failed"] },
+        "scheduledAt": { "type": "string", "format": "date-time" },
+        "imageData": { "type": "string" },
+        "imageStyle": { "type": "string" },
+        "imageType": { "type": "string" },
+        "publishedUrl": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "notified": { "type": "boolean" }
+      },
+      "required": ["userId", "platform", "content", "status", "scheduledAt"]
+    },
+    "SystemConfig": {
+      "title": "System Configuration",
+      "description": "Global system settings manage by admins.",
+      "type": "object",
+      "properties": {
+        "pixazoApiKey": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user settings and configurations."
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Stores all scheduled and published social media posts."
+    },
+    "/shared_api_keys/{keyId}": {
+      "schema": "SharedKey",
+      "description": "Stores API keys that have been shared by users."
+    },
+    "/system_config/{configId}": {
+      "schema": "SystemConfig",
+      "description": "Stores global system configurations like Pixazo API key."
+    }
+  }
+}
