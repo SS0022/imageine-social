@@ -1,10 +1,10 @@
 {
   "projectId": "imagenie-2d397",
-  "appId": "1:43490565430:web:eb49722515e37bce526797",
-  "apiKey": "AIzaSyCZadeqdfdBB80SnExmwaxTmjMIv8fy-T4",
+  "appId": "1:706381752653:web:f030d494d5bdc35edaef04",
+  "apiKey": "AIzaSyB1uRZLfwzkea4JBhxq6hcbTCWO_wKl_Ao",
   "authDomain": "imagenie-2d397.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-ac4ee076-2075-4ba6-be9c-d434c218f915",
-  "storageBucket": "gen-lang-client-0871219618.firebasestorage.app",
-  "messagingSenderId": "43490565430",
+  "storageBucket": "imagenie-2d397.firebasestorage.app",
+  "messagingSenderId": "706381752653",
   "measurementId": ""
 }
